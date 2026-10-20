@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>הפרויקטים האישיים שלי</title>
+<!-- Design system: OpenDesign / nike (option 3), dark-adapted: inverted grey-900/800/700 surfaces,
+     Orange Flash #FF5000 (Podium orange-400) as the single hot accent.
+     Futura ND → Karantina 700 (display only, ≥24px). Helvetica Now → Heebo 400/500 (500 for everything interactive).
+     Personal (non-Zehut) projects. Data: ./data.json in this repo — edit it, then ./update.sh "msg". Copy of the zehut-dashboard design. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karantina:wght@700&family=Heebo:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#111111; --deep:#1F1F21; --dark:#28282A; --dark-hover:#39393B;
+    --white:#FFFFFF; --grey-300:#CACACB; --grey-400:#9E9EA0; --grey-500:#707072; --dis-inv:#4B4B4D;
+    --orange:#FF5000; --red:#EE0005; --success-inv:#1EAA52; --focus:rgba(39,93,197,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--black)}
+  body{font-family:"Heebo",Helvetica,Arial,sans-serif;color:var(--white);max-width:480px;margin:0 auto;-webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom)}
+  button,input,textarea{font-family:inherit;color:inherit}
+  button{cursor:pointer}
+  :focus-visible{outline:none;box-shadow:0 0 0 2px var(--focus)}
+  .display{font-family:"Karantina",Impact,sans-serif;font-weight:700}
+
+  /* promo banner */
+  .promo{background:var(--black);font-size:12px;font-weight:500;text-align:center;padding:10px 16px;border-bottom:1px solid var(--dark)}
+  .promo b{color:var(--orange);font-weight:500}
+
+  /* nav */
+  .nav{display:flex;justify-content:space-between;align-items:center;height:60px;padding:0 16px}
+  .logo{font-size:34px;line-height:1}
+  .icon-btn{width:44px;height:44px;border-radius:50%;background:var(--dark);border:0;display:grid;place-items:center;font-size:22px;font-weight:500;color:var(--white)}
+  .icon-btn:active{background:var(--dark-hover)}
+
+  /* hero */
+  .hero{padding:24px 16px 32px}
+  .eyebrow{font-size:14px;font-weight:500;color:var(--grey-400)}
+  .hero h1{font-size:112px;line-height:.9;margin:8px 0 4px;letter-spacing:-1px}
+  .hero h1 span{color:var(--orange)}
+  .hero p{font-size:16px;line-height:1.75;color:var(--grey-300)}
+  .chips{display:flex;gap:8px;margin-top:20px;overflow-x:auto;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{border:1.5px solid var(--dis-inv);background:transparent;border-radius:30px;padding:0 16px;min-height:40px;font-size:14px;font-weight:500;white-space:nowrap;transition:background .2s ease,border-color .2s ease}
+  .chip.on{background:var(--white);color:var(--black);border-color:var(--white)}
+
+  /* stats */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:0 16px}
+  .stat{background:var(--deep);padding:16px 12px;border:0;text-align:right;color:var(--white)}
+  .stat strong{font-size:48px;line-height:.9;display:block}
+  .stat span{font-size:12px;font-weight:500;color:var(--grey-400)}
+
+  .h1{font-size:32px;font-weight:500;line-height:1.2;padding:48px 16px 16px;display:flex;justify-content:space-between;align-items:baseline}
+  .h1 small{font-size:14px;color:var(--grey-400);font-weight:500}
+
+  /* cards */
+  .cards{display:flex;flex-direction:column;gap:12px;padding:0 16px}
+  .card{background:var(--deep);border-radius:20px;padding:20px;border:0;text-align:right;width:100%;color:var(--white);display:block}
+  .row{display:flex;justify-content:space-between;align-items:center}
+  .badge{font-size:12px;font-weight:500;border-radius:30px;padding:4px 12px;background:var(--dark);color:var(--grey-300)}
+  .badge.active{background:var(--orange);color:var(--black)}
+  .badge.done{color:var(--success-inv)}
+  .date{font-size:12px;font-weight:500;color:var(--grey-400)}
+  .date.soon{color:var(--orange)}
+  .date.late{color:var(--red)}
+  .card h3{font-size:24px;font-weight:500;line-height:1.2;margin:16px 0 4px}
+  .desc{font-size:14px;line-height:1.5;color:var(--grey-400)}
+  .prog{display:flex;align-items:flex-end;gap:12px;margin:20px 0 16px}
+  .pct{font-size:64px;line-height:.8;min-width:2ch}
+  .bar{flex:1;height:8px;border-radius:30px;background:var(--dark);overflow:hidden;margin-bottom:6px}
+  .bar i{display:block;height:100%;border-radius:30px;background:var(--white);transition:width .4s ease}
+  .card.active .bar i{background:var(--orange)}
+  .next{background:var(--dark);border-radius:18px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .next .k{font-size:12px;font-weight:500;color:var(--grey-400);display:block}
+  .next .v{font-size:16px;font-weight:500;line-height:1.5}
+  .arrow{width:36px;height:36px;border-radius:50%;background:var(--white);color:var(--black);display:grid;place-items:center;font-size:18px;flex:none}
+  .card.done h3,.card.done .pct{color:var(--grey-400)}
+  /* finished projects: own group, big green check */
+  .donehead{grid-column:1/-1;padding:32px 4px 4px;color:var(--success-inv)}
+  .card.fin{padding:16px 18px}
+  .finrow{display:flex;gap:14px;align-items:center}
+  .okc{width:44px;height:44px;border-radius:50%;background:var(--success-inv);color:#fff;display:grid;place-items:center;font-size:24px;font-weight:700;flex:none}
+  .card.fin h3{margin:0 0 2px;font-size:20px;color:var(--white)}
+  .card.fin .date{display:block;margin-top:4px}
+  .empty{background:var(--deep);border-radius:20px;padding:32px 20px;text-align:center;color:var(--grey-400);font-size:16px;font-weight:500}
+
+  /* timeline */
+  .tl{display:none;padding:0 16px}
+  .tl.show{display:block}
+  .tl-item{display:grid;grid-template-columns:64px 1fr;gap:12px;padding:16px 0;box-shadow:0 -1px 0 0 var(--dark) inset}
+  .tl-date{font-size:36px;line-height:.9}
+  .tl-date small{display:block;font-family:"Heebo";font-size:12px;font-weight:500;color:var(--grey-400);margin-top:4px}
+  .tl-t{font-size:16px;font-weight:500}
+  .tl-n{font-size:14px;color:var(--grey-400);line-height:1.5}
+
+  .actions{display:flex;gap:8px;padding:32px 16px 48px}
+  .btn{flex:1;border-radius:30px;min-height:48px;padding:12px 24px;font-size:16px;font-weight:500;border:0;transition:background .2s ease}
+  .btn-primary{background:var(--white);color:var(--black)}
+  .btn-primary:active{background:var(--grey-300)}
+  .btn-secondary{background:transparent;color:var(--white);border:1.5px solid var(--dis-inv)}
+  .btn-secondary:active{border-color:var(--grey-500)}
+  .btn-danger{background:transparent;color:var(--red);border:1.5px solid var(--dis-inv);flex:0 0 auto}
+
+  /* editor sheet */
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:10}
+  .scrim.show{opacity:1;pointer-events:auto}
+  .sheet{position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;background:var(--deep);border-radius:20px 20px 0 0;padding:12px 16px calc(24px + env(safe-area-inset-bottom));
+         transform:translateY(105%);visibility:hidden;transition:transform .25s ease,visibility 0s .25s;z-index:11;max-height:92vh;overflow-y:auto}
+  .sheet.show{transform:none;visibility:visible;transition:transform .25s ease}
+  .grab{width:40px;height:4px;border-radius:30px;background:var(--dis-inv);margin:0 auto 16px}
+  .sheet h2{font-size:48px;line-height:.9;margin-bottom:16px}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:12px;font-weight:500;color:var(--grey-400);margin-bottom:6px}
+  .input{width:100%;background:var(--dark);border:1px solid var(--dark);border-radius:8px;padding:12px;font-size:16px;line-height:1.5;transition:border-color .2s ease}
+  .input:focus{border-color:var(--white);outline:none}
+  textarea.input{resize:none;min-height:72px}
+  .seg{display:flex;gap:8px}
+  .seg .chip{flex:1}
+  .range-row{display:flex;align-items:center;gap:16px}
+  .range-row .pct{font-size:48px;min-width:3.2ch;text-align:left}
+  input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:8px;border-radius:30px;background:var(--dark);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:var(--white);border:0}
+  input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--white);border:0}
+  .sheet .actions{padding:8px 0 0}
+  .toast{position:fixed;top:16px;left:50%;transform:translate(-50%,-80px);background:var(--white);color:var(--black);border-radius:30px;padding:10px 20px;font-size:14px;font-weight:500;transition:transform .25s ease;z-index:20}
+  .toast.show{transform:translate(-50%,0)}
+  /* board lists inside the sheet */
+  .list-h{font-size:12px;font-weight:500;color:var(--grey-400);margin:20px 0 8px;display:flex;justify-content:space-between}
+  .li{display:flex;gap:12px;align-items:flex-start;padding:12px 0;box-shadow:0 -1px 0 0 var(--dark) inset;font-size:16px;line-height:1.5}
+  .li .m{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:500;margin-top:2px}
+  .li.done .m{background:var(--dark);color:var(--success-inv)} .li.done{color:var(--grey-400)}
+  .li.todo .m{border:1.5px solid var(--dis-inv)}
+  .li.wait .m{background:var(--orange);color:var(--black)}
+  .li .who{display:block;font-size:12px;font-weight:500;color:var(--orange)}
+  .sheet .sub{font-size:16px;line-height:1.5;color:var(--grey-300);margin-top:-4px}
+  a.btn{display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;white-space:nowrap}
+  .who-name{font-size:48px;line-height:.9;margin:24px 0 4px}
+  .err{background:var(--deep);border-radius:20px;padding:24px 20px;font-size:16px;font-weight:500;line-height:1.5}
+
+  /* Responsive — DESIGN.md §8 collapsing strategy: 1-col <640 → 2-col tablet → 3-col desktop;
+     horizontal padding 16 → 24 → 48px; display type scales up; max content ~1440px. */
+  .card{display:flex;flex-direction:column}
+  .card .next{margin-top:auto}
+  @media (min-width:640px){
+    body{max-width:1440px}
+    .nav,.hero{padding-left:24px;padding-right:24px}
+    .stats,.cards,.tl{padding-left:24px;padding-right:24px}
+    .h1{padding-left:24px;padding-right:24px}
+    .actions{padding-left:24px;padding-right:24px;max-width:640px}
+    .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .sheet{max-width:560px}
+  }
+  @media (min-width:1024px){
+    .nav,.hero,.stats,.cards,.tl,.h1,.actions{padding-left:48px;padding-right:48px}
+    .actions{max-width:736px}
+    .hero{padding-top:48px}
+    .hero h1{font-size:160px}
+    .cards{grid-template-columns:repeat(3,1fr)}
+    .tl.show{display:grid;grid-template-columns:repeat(2,1fr);column-gap:48px;align-items:start}
+    .tl .who-name{grid-column:1/-1}
+  }
+</style>
+</head>
+<body>
+  <div class="promo" id="promo">פרויקטים אישיים · <a href="https://torahworldwide.github.io/zehut-dashboard/" style="color:var(--orange);text-decoration:none">פרויקטי זהות ←</a></div>
+  <nav class="nav"><span class="logo display">תומר</span><button class="icon-btn" id="refreshTop" aria-label="רענון">↻</button></nav>
+
+  <header class="hero">
+    <div class="eyebrow" id="updated">הסטודיו שלי</div>
+    <h1 class="display">בונים<span>.</span></h1>
+    <p id="tagline">טוען את הלוח…</p>
+    <div class="chips" id="filters">
+      <button class="chip on" data-f="all">הכול</button>
+      <button class="chip" data-f="active">פעיל</button>
+      <button class="chip" data-f="waiting">ממתין</button>
+      <button class="chip" data-f="done">הושלם</button>
+    </div>
+  </header>
+
+  <section class="stats" id="stats"></section>
+
+  <h2 class="h1"><span id="listTitle">הפרויקטים</span><small id="listCount"></small></h2>
+  <main class="cards" id="cards"></main>
+  <section class="tl" id="whoView"></section>
+
+  <div class="actions">
+    <button class="btn btn-primary" id="toggleView">מחכים ל…</button>
+    <button class="btn btn-secondary" id="refresh">רענון</button>
+  </div>
+
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true">
+    <div class="grab"></div>
+    <div id="sheetBody"></div>
+    <div class="actions" id="sheetActions"></div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+<script>
+const DATA_URL = './data.json';
+const CAT = {active:'פעיל', waiting:'ממתין', done:'הושלם'};
+const $ = s => document.querySelector(s);
+let board = null, filter = 'all', view = 'cards';
+
+const esc = s => String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const arr = a => Array.isArray(a) ? a : [];
+// the board's free-text status → one of the three dashboard categories
+function category(p){
+  const todo = arr(p.todo).length, wait = arr(p.wait).length, st = String(p.status||'');
+  if(p.finished || (!todo && !wait)) return 'done';
+  if(/מחכ|ממתין|תקוע/.test(st)) return 'waiting';
+  return 'active';
+}
+function progress(p){
+  const d = arr(p.done).length, total = d + arr(p.todo).length + arr(p.wait).length;
+  return total ? Math.round(d*100/total) : 100;
+}
+function waitWho(p){ return [...new Set(arr(p.wait).map(w=>w.who).filter(Boolean))]; }
+function nextStep(p){
+  const t = arr(p.todo)[0]; if(t) return {k:'הצעד הבא', v:t};
+  const w = arr(p.wait)[0]; if(w) return {k: w.who ? `מחכה ל${w.who}` : 'מחכה', v:w.t};
+  return {k:'הצעד הבא', v:'הכול בוצע'};
+}
+function order(list){ const r={active:0,waiting:1,done:2}; return [...list].sort((a,b)=>r[category(a)]-r[category(b)]); }
+
+function renderCountdown(){} // personal board: no election countdown
+function ago(iso){
+  const m = Math.round((new Date() - new Date(iso))/6e4); if(isNaN(m)) return '';
+  if(m<2) return 'עכשיו'; if(m<60) return `לפני ${m} דקות`;
+  const h = Math.round(m/60); if(h<24) return h===1?'לפני שעה':`לפני ${h} שעות`;
+  const d = new Date(iso); return `ב־${d.getDate()}.${d.getMonth()+1}`;
+}
+
+function render(){
+  renderCountdown();
+  if(!board){ return; }
+  const P = arr(board.projects);
+  $('#updated').textContent = `הסטודיו שלי · עודכן ${ago(board.updated)}`;
+  const c = {active:0, waiting:0, done:0}; P.forEach(p=>c[category(p)]++);
+  $('#stats').innerHTML = ['active','waiting','done'].map(s=>
+    `<button class="stat" data-f="${s}"><strong class="display">${c[s]}</strong><span>${s==='active'?'פעילים':CAT[s]}</span></button>`).join('');
+  $('#tagline').textContent = `${P.length} פרויקטים אישיים. בלי זהות, רק שלך.`;
+  document.querySelectorAll('#filters .chip').forEach(b=>b.classList.toggle('on', b.dataset.f===filter));
+  const list = order(P.filter(p=>filter==='all'||category(p)===filter));
+  $('#listTitle').textContent = view==='cards' ? 'הפרויקטים' : 'מחכים ל…';
+  $('#cards').style.display = view==='cards' ? '' : 'none';
+  $('#whoView').classList.toggle('show', view==='who');
+  $('#toggleView').textContent = view==='cards' ? 'מחכים ל…' : 'כרטיסים';
+
+  $('#listCount').textContent = view==='cards' ? (list.length||'') : '';
+  const card = p=>{
+    const cat = category(p), pr = progress(p), n = nextStep(p), who = waitWho(p);
+    const steps = arr(p.done).length + arr(p.todo).length + arr(p.wait).length;
+    return `<button class="card ${cat}" data-id="${esc(p.id)}">
+      <div class="row"><span class="badge ${cat}">${esc(p.status||CAT[cat])}${cat==='done'?' ✓':''}</span><span class="date ${who.length?'soon':''}">${who.length?esc('מחכה ל'+who.join(' ול')):''}</span></div>
+      <h3>${esc(p.name)}</h3>
+      ${p.sub?`<p class="desc">${esc(p.sub)}</p>`:''}
+      <div class="prog"><span class="pct display">${pr}%</span><div class="bar"><i style="width:${pr}%"></i></div></div>
+      <div class="next"><div><span class="k">${esc(n.k)} · ${arr(p.done).length}/${steps} בוצעו</span><span class="v">${esc(n.v)}</span></div><span class="arrow">←</span></div>
+    </button>`};
+  const fin = p=>`<button class="card done fin" data-id="${esc(p.id)}"><div class="finrow"><span class="okc">✓</span><div>
+      <h3>${esc(p.name)}</h3>${p.sub?`<p class="desc">${esc(p.sub)}</p>`:''}${p.when?`<span class="date">${esc(p.when)}</span>`:''}</div></div></button>`;
+  const open = list.filter(p=>category(p)!=='done'), done = list.filter(p=>category(p)==='done');
+  $('#cards').innerHTML = list.length ? open.map(card).join('')
+    + (done.length ? `<h2 class="h1 donehead"><span>✓ סיימתי</span><small>${done.length}</small></h2>` + done.map(fin).join('') : '')
+    : `<div class="empty">אין כאן פרויקטים</div>`;
+
+  // who-view: everything we're waiting on, grouped by person
+  const by = {};
+  list.forEach(p=>arr(p.wait).forEach(w=>{ (by[w.who||'לא ידוע'] ||= []).push({p, t:w.t}); }));
+  const names = Object.keys(by).sort((a,b)=>by[b].length-by[a].length);
+  $('#whoView').innerHTML = names.length ? names.map(n=>`<div class="who-name display">${esc(n)}</div>`+
+    by[n].map(x=>`<div class="tl-item" style="grid-template-columns:1fr"><div><div class="tl-t">${esc(x.t)}</div><div class="tl-n">${esc(x.p.name)}</div></div></div>`).join('')).join('')
+    : `<div class="empty">לא מחכים לאף אחד</div>`;
+}
+
+function openSheet(p){
+  const who = waitWho(p);
+  const li = (cls, mark, t, extra='') => `<div class="li ${cls}"><span class="m">${mark}</span><div>${extra}${esc(t)}</div></div>`;
+  const sec = (title, items) => items ? `<div class="list-h"><span>${title}</span></div>${items}` : '';
+  $('#sheetBody').innerHTML = `<h2 class="display">${esc(p.name)}</h2>${p.sub?`<p class="sub">${esc(p.sub)}</p>`:''}`
+    + sec(`מחכים ל${who.length?esc(who.join(' ול')):'…'}`, arr(p.wait).map(w=>li('wait','!',w.t, w.who?`<span class="who">${esc(w.who)}</span>`:'')).join(''))
+    + sec('לעשות', arr(p.todo).map(t=>li('todo','',t)).join(''))
+    + sec('בוצע', arr(p.done).map(t=>li('done','✓',t)).join(''));
+  $('#sheetActions').innerHTML = (p.link?`<a class="btn btn-primary" href="${esc(p.link)}" target="_blank" rel="noopener">לפתוח</a>`:'')
+    + `<button class="btn btn-secondary" id="closeSheet">סגירה</button>`;
+  $('#scrim').classList.add('show'); $('#sheet').classList.add('show'); $('#sheet').scrollTop = 0;
+}
+function closeSheet(){ $('#scrim').classList.remove('show'); $('#sheet').classList.remove('show'); }
+let tt; function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('show'),1800); }
+
+async function load(manual){
+  try{
+    const r = await fetch(DATA_URL+'?t='+Date.now(), {cache:'no-store'});
+    if(!r.ok) throw new Error(r.status);
+    board = await r.json();
+    try{ localStorage.setItem('my-projects-cache', JSON.stringify(board)); }catch(e){}
+    if(manual) toast('עודכן');
+  }catch(e){
+    const cached = localStorage.getItem('my-projects-cache');
+    if(cached && !board){ board = JSON.parse(cached); toast('אין חיבור — מציג את הגרסה האחרונה'); }
+    else if(!board){ $('#cards').innerHTML = `<div class="err">לא הצלחתי לטעון את הלוח.<br><span class="desc">בדוק חיבור ולחץ רענון.</span></div>`; $('#tagline').textContent=''; renderCountdown(); return; }
+    else if(manual) toast('אין חיבור כרגע');
+  }
+  render();
+}
+
+document.addEventListener('click', e=>{
+  if(e.target.closest('#closeSheet')){ closeSheet(); return; }
+  const f = e.target.closest('[data-f]'); if(f){ filter = (filter===f.dataset.f && f.classList.contains('stat')) ? 'all' : f.dataset.f; render(); return; }
+  const card = e.target.closest('.card'); if(card && board){ const p = arr(board.projects).find(x=>String(x.id)===card.dataset.id); if(p) openSheet(p); }
+});
+$('#toggleView').onclick = ()=>{ view = view==='cards'?'who':'cards'; render(); };
+$('#refresh').onclick = $('#refreshTop').onclick = ()=>load(true);
+$('#scrim').onclick = closeSheet;
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeSheet(); });
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) load(false); });
+setInterval(()=>load(false), 5*60*1000);
+renderCountdown(); load(false);
+</script>
+</body>
+</html>
